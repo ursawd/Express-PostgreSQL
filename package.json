@@ -10,6 +10,8 @@
   "author": "PDB",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "pg": "^8.5.1",
+    "supertest": "^6.1.3"
   }
 }
