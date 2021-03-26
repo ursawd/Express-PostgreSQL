@@ -21,6 +21,7 @@ CREATE TABLE invoices (
     paid boolean DEFAULT false NOT NULL,
     add_date date DEFAULT CURRENT_DATE NOT NULL,
     paid_date date,
+    -- constraint name below is {table}_{column}_check 
     CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
 );
 

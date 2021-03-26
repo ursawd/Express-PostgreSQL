@@ -17,13 +17,24 @@ router.get("/", async (req, res, next) => {
 router.get("/:code", async (req, res, next) => {
   try {
     code = req.params.code;
-    const results = await db.query("SELECT * FROM companies WHERE code = $1", [
-      code,
-    ]);
+    const results = await db.query(
+      "select * from companies full outer join invoices on companies.code = invoices.comp_code where companies.code=$1;",
+      [code]
+    );
+
     if (results.rowCount === 0) {
       throw new ExpressError("Invalid company code", 404);
     }
-    return res.json({ company: results.rows[0] });
+
+    const { code: cCode, name, description } = results.rows[0];
+
+    const invoiceArray = results.rows.map((row) => {
+      const { id, amt, paid, add_date, paid_date } = row;
+      return { id, amt, paid, add_date, paid_date };
+    });
+    return res.json({
+      company: { code: cCode, name, description, invoices: invoiceArray },
+    });
   } catch (error) {
     return next(error);
   }
