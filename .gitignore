@@ -1,6 +1,7 @@
 
 express-biztime/
 express-pg-intro-demo/
+express-pg-relationships-demo/
 # Logs
 logs
 *.log

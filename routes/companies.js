@@ -25,9 +25,7 @@ router.get("/:code", async (req, res, next) => {
     if (results.rowCount === 0) {
       throw new ExpressError("Invalid company code", 404);
     }
-
     const { code: cCode, name, description } = results.rows[0];
-
     const invoiceArray = results.rows.map((row) => {
       const { id, amt, paid, add_date, paid_date } = row;
       return { id, amt, paid, add_date, paid_date };
