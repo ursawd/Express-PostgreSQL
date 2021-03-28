@@ -53,10 +53,11 @@ router.post("/", async (req, res, next) => {
 // ------------------------------------------------
 router.put("/:code", async (req, res, next) => {
   try {
-    const { code, name, description } = req.body;
+    const { name, description } = req.body;
+    const code = req.params.code;
     const results = await db.query(
-      "UPDATE companies SET code=$1, name=$2, description=$3 WHERE code=$4",
-      [code, name, description, req.params.code]
+      "UPDATE companies SET  name=$1, description=$2 WHERE code=$3",
+      [name, description, code]
     );
 
     if (results.rowCount === 0) {
