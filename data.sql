@@ -25,6 +25,19 @@ CREATE TABLE invoices (
     CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
 );
 
+CREATE TABLE industries(
+  code text PRIMARY KEY,
+  industry text NOT NULL
+);
+
+CREATE TABLE company_industry(
+comp_code text NOT NULL REFERENCES companies,
+ind_code text NOT NULL REFERENCES industries,
+PRIMARY KEY(comp_code,ind_code)
+);
+
+
+
 INSERT INTO companies
   VALUES ('apple', 'Apple Computer', 'Maker of OSX.'),
          ('ibm', 'IBM', 'Big blue.');
@@ -34,3 +47,14 @@ INSERT INTO invoices (comp_Code, amt, paid, paid_date)
          ('apple', 200, false, null),
          ('apple', 300, true, '2018-01-01'),
          ('ibm', 400, false, null);
+
+INSERT INTO industries (code,industry)
+  VALUES ('acct','Accounting'),
+         ('it','Information Technology'),
+         ('trkg','Trucking'),
+         ('sales','Sales');
+
+         INSERT INTO company_industry
+  VALUES ('ibm','it'),
+         ('ibm','sales'),
+         ('apple','it');

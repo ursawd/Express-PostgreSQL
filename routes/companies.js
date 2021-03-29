@@ -22,17 +22,43 @@ router.get("/:code", async (req, res, next) => {
       "select * from companies full outer join invoices on companies.code = invoices.comp_code where companies.code=$1;",
       [code]
     );
-
     if (results.rowCount === 0) {
       throw new ExpressError("Invalid company code", 404);
     }
+
+    const indResults = await db.query(
+      `select i.industry 
+      from companies as c
+      left join company_industry as ci
+      on c.code = ci.comp_code 
+      left join industries as i 
+      on ci.ind_code = i.code 
+      where c.code = $1;`,
+      [code]
+    );
+
+    if (indResults.rowCount === 0) {
+      throw new ExpressError("Invalid company code", 404);
+    }
+
+    // const industries = indResults.rows;
+    const industries = indResults.rows.map((row) => row.industry);
+
     const { code: cCode, name, description } = results.rows[0];
+
     const invoiceArray = results.rows.map((row) => {
       const { id, amt, paid, add_date, paid_date } = row;
       return { id, amt, paid, add_date, paid_date };
     });
+
     return res.json({
-      company: { code: cCode, name, description, invoices: invoiceArray },
+      company: {
+        code: cCode,
+        name,
+        description,
+        invoices: invoiceArray,
+        industries,
+      },
     });
   } catch (error) {
     return next(error);
