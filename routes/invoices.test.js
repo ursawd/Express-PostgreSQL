@@ -29,81 +29,68 @@ beforeEach(async function () {
 });
 //##################  TESTS  #########################
 //
-describe("Retrieve records from companies table", function () {
-  test("GET a array of 1 company", async function () {
-    const response = await request(app).get("/companies");
+describe("Retrieve records from invoices table", function () {
+  test("GET a array of 1 invoice", async function () {
+    const response = await request(app).get("/invoices");
+    const { id, comp_code, amt, paid } = response.body.invoices[0];
+    const { id: a, comp_code: b, amt: c, paid: d } = testInvoice;
     expect(response.statusCode).toEqual(200);
-    expect(response.body.companies[0]).toEqual(testCompany);
+    expect([id, comp_code, amt, paid]).toEqual([a, b, c, d]);
   });
 });
 
 // -----------------------------------------------
-describe("Retrieve a single record from companies table", function () {
-  test("GET an object of 1 company", async function () {
-    const response = await request(app).get(`/companies/${testCompany.code}`);
+describe("Retrieve a single invoice from invoices table", function () {
+  test("GET an object of 1 invoice with joined company info", async function () {
+    const response = await request(app).get(`/invoices/${testInvoice.id}`);
     expect(response.statusCode).toEqual(200);
-    expect(response.body.company.invoices[0].amt).toEqual(testInvoice.amt);
+    expect(response.body.invoice.amt).toEqual(testInvoice.amt);
   });
-  test("Return 404 if company code not found", async function () {
-    const response = await request(app).get(`/companies/@@@`);
+  test("Return 404 if invoice id not found", async function () {
+    const response = await request(app).get(`/invoices/0`);
     expect(response.statusCode).toEqual(404);
   });
 });
 
 // -----------------------------------------------
-describe("Add a company to companies table", function () {
-  test("Create a new company", async function () {
-    const response = await request(app).post(`/companies`).send({
-      code: "abc",
-      name: "Google",
-      description: "The alphabet company",
+describe("Add a invoice to invoices table", function () {
+  test("Create a new invoice", async function () {
+    const response = await request(app).post(`/invoices`).send({
+      comp_code: "ibm",
+      amt: 999.0,
+      paid_date: null,
     });
     expect(response.statusCode).toEqual(201);
-    expect(response.body).toEqual({
-      company: {
-        code: "abc",
-        name: "Google",
-        description: "The alphabet company",
-      },
-    });
+    expect(response.body.invoice.amt).toEqual(999.0);
   });
 });
 // -----------------------------------------------
-describe("Replace a company name or description with PUT", function () {
-  test("Replaces company name or description", async function () {
+describe("Replace an invoice amount with PUT", function () {
+  test("Replaces specific invoice amt", async function () {
     const response = await request(app)
-      .put(`/companies/${testCompany.code}`)
+      .put(`/invoices/${testInvoice.id}`)
       .send({
-        name: "Google",
-        description: "The alphabet company",
+        amt: "999999.00",
       });
     expect(response.statusCode).toEqual(200);
-    expect(response.body).toEqual({
-      company: {
-        code: "ibm",
-        name: "Google",
-        description: "The alphabet company",
-      },
-    });
+    expect(response.body.invoice.amt).toEqual(999999.0);
   });
-  test("Return 404 if company code not found", async function () {
-    const response = await request(app).get(`/companies/@@@`);
+  test("Return 404 if invoice id not found", async function () {
+    const response = await request(app).get(`/invoices/0`);
     expect(response.statusCode).toEqual(404);
   });
 });
 
 // -----------------------------------------------
-describe("Delete a company from companies table", function () {
-  test("Delete a company", async function () {
-    const response = await request(app).delete(
-      `/companies/${testCompany.code}`
-    );
+describe("Delete an invoice from invoices table", function () {
+  test("Delete an invoice", async function () {
+    const response = await request(app).delete(`/invoices/${testInvoice.id}`);
     expect(response.statusCode).toEqual(200);
     expect(response.body).toEqual({ status: "deleted" });
   });
 
-  test("Return 404 if company code not found", async function () {
-    const response = await request(app).delete(`/companies/@@@`);
+  test("Return 404 if invoice id not found", async function () {
+    const response = await request(app).delete(`/invoices/0`);
     expect(response.statusCode).toEqual(404);
   });
 });
