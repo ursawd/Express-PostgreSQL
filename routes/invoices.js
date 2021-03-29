@@ -84,10 +84,32 @@ router.post("/", async (req, res, next) => {
 // ------------------------------------------------
 router.put("/:id", async (req, res, next) => {
   try {
-    const { amt } = req.body;
+    const { amt, paid } = req.body;
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    id = req.params.id;
+    const curResults = await db.query(
+      "select paid,paid_date from invoices where id = $1",
+      [id]
+    );
+    if (curResults.rowCount === 0) {
+      throw new ExpressError("Invalid invoice id", 404);
+    }
+    const isPaid = curResults.rows[0].paid;
+    const paidDate = curResults.rows[0].paid_date;
+
+    if (!isPaid && paid) {
+      paid_date = new Date();
+    } else if (!paid) {
+      paid_date = null;
+    } else {
+      paid_date = paidDate;
+    }
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     const results = await db.query(
-      "UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *",
-      [amt, req.params.id]
+      "UPDATE invoices SET amt=$1, paid=$2, paid_date=$3 WHERE id=$4 RETURNING *",
+      [amt, paid, paid_date, req.params.id]
     );
     if (results.rowCount === 0) {
       throw new ExpressError("PUT: Invalid invoice id", 404);
